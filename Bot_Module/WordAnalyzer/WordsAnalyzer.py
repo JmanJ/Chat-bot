@@ -13,7 +13,7 @@ from IncorrectMessage import IncorrectMessage
 class WordsAnalyzer():
     def __init__(self, morph_module):
         self.morph = morph_module
-        self.semantics_analyzer = SemanticsAnalyzer(morph_module)
+        self.semantics_analyzer = SemanticsAnalyzer()
         self.sentence = None
         self.sentences = []
 
@@ -36,6 +36,7 @@ class WordsAnalyzer():
 
     def word_processing(self, word):
         #print type(word.encode("utf-8"))
+        word = word.lower()
         text_info = self.morph.parse(word)[0]
         if "UNKN" in text_info.tag:
             #DOTO digital

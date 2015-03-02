@@ -3,62 +3,93 @@ from SemanticNodes import *
 
 
 class TemplateEngine():
-    def __init__(self, sentence, template, node_list):
+    """Сравнивает предложение с шаблоном. Возвращает имя семантического гнезда если шаблон распознан.
+    Получить сформированный список с объектами распознанных гнезд с помощью метода get_node_list()"""
+
+    def __init__(self, sentence):
         self.sentence = sentence
-        self.template = template
-        self.node_list = node_list
+        self.template = {}
+        self.node_list = []
         self.recognized_words = []
 
-    def parse(self):
-        index = self.parse_body(self.template["body"])
+    def parse(self, template):
+        self.template = template
+        flag = False
+        index = 0
+        self.recognized_words = []
+        while index != -1:
+            index = self.parse_body(self.template["body"], index)
+            if index != -1:
+                flag = True
         #wablon raspoznan
-        if index > 0:
+        if flag:
+            #node_list = list(self.node_set)
             for node in self.node_list:
+                #takoi yje est' v spiske
                 if isinstance(node, self.template["SemanticNode"]):
                     node.words.append(self.recognized_words)
                     node.chance = node.chance + self.template["chance"]
-                    return self.node_list
+                    return None
             semantic_node = self.template["SemanticNode"](self.recognized_words, self.template["chance"])
             self.node_list.append(semantic_node)
-            return self.node_list
+            return self.template["SemanticNode"].__name__
+        return None
 
-    def parse_body(self, template_body):
-        start_word_index = 0
-        self.recognized_words = []
+    def parse_body(self, template_body, start_word_index):
+        #next_only = False
         for group in template_body:
+            if not group:
+                pass
+            #    next_only = False
             start_word_index = self.parse_group(group, start_word_index)
             #Ne ydalos' naiti neobhodimie konstrykcii
             if start_word_index == -1:
                 break
+
         return start_word_index
 
     def parse_group(self, template_group, start_word_index):
-        next_only = False
+        real_start_word_index = start_word_index
+        flag = False
         for words_group in template_group:
-            if not words_group:
-                next_only = False
-            start_word_index = self.parse_word(words_group, start_word_index, next_only)
-            if start_word_index != -1:
-                next_only = True
-            else:
+            current_start_word_index = self.parse_word(words_group, start_word_index)
+            if current_start_word_index > real_start_word_index:
+                real_start_word_index = current_start_word_index
+            if current_start_word_index == -1:
                 break
-        return start_word_index
+            else:
+                flag = True
+        if flag:
+            return real_start_word_index
+        else:
+            return -1
 
-    def parse_word(self, words_group, start_word_index, next_only):
+    def parse_word(self, words_group, start_word_index):
         if start_word_index < len(self.sentence.words):
             end_word_index = len(self.sentence.words)
-            if next_only:
-                end_word_index = start_word_index + 1
             for sentence_word in self.sentence.words[start_word_index:end_word_index]:
+                f_word = 0
+                f_lexem = 0
                 for word in words_group["kwords"]:
+                    f_word = 1
                     #Slovo naideno, vozvrawaem sledyuwii nomer slova
-                    if word == sentence_word.get_normal_form() and set(words_group["lexems"]) in sentence_word.get_lexemes():
-                        self.recognized_words.append(sentence_word)
-                        return self.sentence.words.index(sentence_word) + 1
-                #DOTO lexems
+                    if word == sentence_word.get_normal_form():
+                        f_word = 2
+                        break
+                for lexem in words_group["lexems"]:
+                    f_lexem = 1
+                    if set(lexem.split(",")) in sentence_word.get_lexemes():
+                        f_lexem = 2
+                        break
+                if f_word != 1 and f_lexem != 1:
+                    self.recognized_words.append(sentence_word)
+                    return self.sentence.words.index(sentence_word) + 1
         #Slovo ne naideno, no ono doljno bit'
         if words_group["required"]:
             return -1
         else:
             return start_word_index
         #DOTO remember
+
+    def get_node_list(self):
+        return self.node_list

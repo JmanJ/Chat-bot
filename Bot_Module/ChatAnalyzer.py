@@ -7,10 +7,10 @@ import pymorphy2
 class ChatAnalyzer():
     def __init__(self):
         self.morph = pymorphy2.MorphAnalyzer()
-        self.word_analysis = WordsAnalyzer(self.morph)
+        self.words_analysis = WordsAnalyzer(self.morph)
 
     def message_processing(self, text):
-        self.word_analysis.processing(text)
+        self.words_analysis.processing(text)
 
     #DOTO history uploading, preservation
     #DOTO time to answer
