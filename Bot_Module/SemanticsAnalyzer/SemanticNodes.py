@@ -11,6 +11,7 @@ class SemanticNode():
 
     def __init__(self, words=None, chance=0):
         self.chance = chance
+        self.type = None
         if words:
             self.words = [words]
         else:
@@ -84,6 +85,18 @@ class Myself(SemanticNode):
     """Говорит о себе"""
 
 
+class DoYou(SemanticNode):
+    """ВЫ"""
+
+
+class WeAre(SemanticNode):
+    """МЫ"""
+
+
+class TheyAre(SemanticNode):
+    """ОНИ"""
+
+
 class Yourself(SemanticNode):
     """Говорит о собеседнике"""
 
@@ -107,15 +120,13 @@ class Thinking(SemanticNode):
     """Сделал бы что-то, возможно, присутствуют частицы бы, ли, же"""
 
 
+#---Гнезда шкалы
+
+
+class PraiseInsult(SemanticNode):
+    """Шкала от оскорбления до похвалы"""
+
 #---Гнезда смешанные
-
-
-class Agression(SemanticNode):
-    """Присутствуют прилагательные с негативным значением"""
-
-
-class Goodwill(SemanticNode):
-    """Присутствуют прилагательные с положительным значением"""
 
 
 class Approval(SemanticNode):

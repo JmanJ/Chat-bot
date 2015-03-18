@@ -31,16 +31,14 @@ class TemplateEngine():
                     node.chance = node.chance + self.template["chance"]
                     return None
             semantic_node = self.template["SemanticNode"](self.recognized_words, self.template["chance"])
+            semantic_node.type = self.template["type"]
             self.node_list.append(semantic_node)
             return self.template["SemanticNode"].__name__
         return None
 
     def parse_body(self, template_body, start_word_index):
-        #next_only = False
+        #ordered = False
         for group in template_body:
-            if not group:
-                pass
-            #    next_only = False
             start_word_index = self.parse_group(group, start_word_index)
             #Ne ydalos' naiti neobhodimie konstrykcii
             if start_word_index == -1:
@@ -50,17 +48,15 @@ class TemplateEngine():
 
     def parse_group(self, template_group, start_word_index):
         real_start_word_index = start_word_index
+        current_start_word_index = -1
         flag = False
         for words_group in template_group:
             current_start_word_index = self.parse_word(words_group, start_word_index)
             if current_start_word_index > real_start_word_index:
-                real_start_word_index = current_start_word_index
-            if current_start_word_index == -1:
+                #nawel slovo
                 break
-            else:
-                flag = True
-        if flag:
-            return real_start_word_index
+        if current_start_word_index != -1:
+            return current_start_word_index
         else:
             return -1
 
@@ -82,6 +78,10 @@ class TemplateEngine():
                         f_lexem = 2
                         break
                 if f_word != 1 and f_lexem != 1:
+                    if "repr" in words_group:
+                        sentence_word.repr = words_group["repr"]
+                    if "value" in words_group:
+                        sentence_word.value = words_group["value"]
                     self.recognized_words.append(sentence_word)
                     return self.sentence.words.index(sentence_word) + 1
         #Slovo ne naideno, no ono doljno bit'

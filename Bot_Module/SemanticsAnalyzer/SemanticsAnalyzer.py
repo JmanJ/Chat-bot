@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 from Bot_Module.WayAnalyzer.WayAnalyzer import WayAnalyzer
+from Bot_Module.WayAnalyzer.Combination import Combination
+from Bot_Module.DataStore.Memory import Memory
 from TemplateEngine import TemplateEngine
 from Templates import templates
 from ManaginProcessing import ManaginProcessing
@@ -7,20 +9,22 @@ from SemanticNodes import *
 
 
 class SemanticsAnalyzer():
-    def __init__(self):
+    def __init__(self, morph_module):
         self.sentence = None
         self.node_list = []
         self.node_set = set()
         self.nodes_for_deleting = set()
         self.template_engine = None
-        self.way_analyzer = WayAnalyzer()
+        self.memory = Memory()
+        self.manager = ManaginProcessing(self.memory)
+        self.way_analyzer = WayAnalyzer(morph_module, self.memory)
 
     def parse_sentence(self, sentence):
         self.sentence = sentence
         self.node_list = self.get_semantic_nodes()
         self.deleting_same_nodes()
         #ManaginProcessing.process_sentence(sentence, self.node_list)
-        self.way_analyzer.processing_nodes(list(self.node_set))
+        self.way_analyzer.processing_nodes(Combination(list(self.node_set), self.get_params_list(self.node_list)))
         for node in self.node_list:
             if str(node.__class__.__name__) in self.node_set:
                 print str(node.__class__.__name__) + ' :'
@@ -28,6 +32,16 @@ class SemanticsAnalyzer():
                     print '---'
                     for word in word_groups:
                         print word.get_word()
+                        if node.type == "scale":
+                            print word.repr
+
+    def get_params_list(self, node_list):
+        params_list = []
+        for node in node_list:
+            if node.type == "scale":
+                params_list.append(("repr", node.words[0][0].repr))
+            else:
+                params_list.append([])
 
     def get_semantic_nodes(self):
         self.template_engine = TemplateEngine(self.sentence)

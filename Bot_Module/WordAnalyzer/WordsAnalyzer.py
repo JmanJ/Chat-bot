@@ -13,7 +13,7 @@ from IncorrectMessage import IncorrectMessage
 class WordsAnalyzer():
     def __init__(self, morph_module):
         self.morph = morph_module
-        self.semantics_analyzer = SemanticsAnalyzer()
+        self.semantics_analyzer = SemanticsAnalyzer(morph_module)
         self.sentence = None
         self.sentences = []
 
